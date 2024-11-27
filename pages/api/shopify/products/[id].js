@@ -2,6 +2,10 @@ import { getSSActivewearProduct } from '../../../../utils/ssactivewear';
 import { updateShopifyProduct } from '../../../../utils/shopify';
 
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   const { id } = req.query;
   const shop = req.headers['x-shopify-shop-domain'];
 
