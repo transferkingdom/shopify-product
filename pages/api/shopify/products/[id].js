@@ -6,20 +6,29 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { id } = req.query;
-  const shop = req.headers['x-shopify-shop-domain'];
-
   try {
-    // SS Activewear'dan ürün bilgilerini al
+    const { id } = req.query;
+    
+    // ID kontrolü
+    if (!id || id === '{' || id === '%7B') {
+      throw new Error('Geçersiz Style ID');
+    }
+
+    console.log('Gelen Style ID:', id);
+
     const ssProduct = await getSSActivewearProduct(id);
     
-    // Shopify ürününü güncelle
-    if (req.method === 'POST') {
-      await updateShopifyProduct(shop, id, ssProduct);
+    // Veri kontrolü
+    if (!ssProduct || !ssProduct.variants) {
+      throw new Error('Ürün verileri alınamadı');
     }
 
     res.status(200).json(ssProduct);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('API Hatası:', error);
+    res.status(500).json({ 
+      error: error.message || 'SS Activewear API hatası',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }
